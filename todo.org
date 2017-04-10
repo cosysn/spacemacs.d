@@ -6,6 +6,7 @@
   可以参考子龙山人的配置，使用 org-octopress
   1. [[https://zilongshanren.com/blog/2015-07-19-add-org-mode-support.html?utm_source=tuicool][使用 Org-mode 来写博客]]
   2. [[https://zilongshanren.com/blog/2015-08-02-migrate-blog-to-hexo.html][迁移博客到 Hexo]]
+  3. [[https://emacs-china.org/t/org-mode/1046][用 org-mode 写博客都有哪些比较方便的方案呢?]]
   或者可以在网上找找是否存在有直接支持 hexo 博客的 package.
 * TODO 支持编辑 evernote 笔记
 * TODO 支持 emacs 分析日志定位问题
