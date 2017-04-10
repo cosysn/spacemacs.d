@@ -1,0 +1,12 @@
+* TODO 在 org mode 上支持 gtd ;
+* TODO 支持番茄工作法，使用 org-pomodoro 实现 ;
+  1. [[http://guleilab.com/2016/05/05/OrgPomodoroNotifier/][给 org-pomodoro 增加桌面通知功能]]
+  2. [[https://emacs-china.org/t/org-agenda/232][有没有 org-agenda 任务提醒的插件]]
+* TODO 使用 emacs 编辑和发布博客
+  可以参考子龙山人的配置，使用 org-octopress
+  1. [[https://zilongshanren.com/blog/2015-07-19-add-org-mode-support.html?utm_source=tuicool][使用 Org-mode 来写博客]]
+  2. [[https://zilongshanren.com/blog/2015-08-02-migrate-blog-to-hexo.html][迁移博客到 Hexo]]
+  或者可以在网上找找是否存在有直接支持 hexo 博客的 package.
+* TODO 支持编辑 evernote 笔记
+* TODO 支持 emacs 分析日志定位问题
+* TODO 将 esxi-sense 使用 elisp 实现并提供 package， 然后集成到 Spacemacs
