@@ -74,7 +74,7 @@ Each entry is either:
 ;; For more info on `use-package', see readme:
 ;; https://github.com/jwiegley/use-package
 
-(defun myorg/post-init-alert ()
+(defun myorg/init-alert ()
   (use-package alert
     :defer t
     :config
@@ -85,6 +85,7 @@ Each entry is either:
         :type 'file
         :group 'alert)
 
+      (message (executable-find "growlnotify"))
       (defcustom alert-growlforwin-priorities
         '((urgent   . 2)
           (high     . 2)
@@ -125,7 +126,7 @@ Each entry is either:
                 (case system-type
                   ('windows-nt (nconc args (list message)))
                   (t (nconc args (list "--message" message)))))
-              (apply #'call-process alert-growl-command nil nil nil args))
+              (apply #'call-process alert-growlforwin-command nil nil nil args))
           (alert-message-notify info)))
 
       (alert-define-style 'growlforwin :title "Notify using Growl"
