@@ -67,7 +67,7 @@ values."
      (chinese :package youdao-dictionary fcitx
               :variables chinese-enable-fcitx nil
               chinese-enable-youdao-dict t)
-     zero-ui
+     myui
      myorg
      )
    ;; List of additional packages that will be installed without being
