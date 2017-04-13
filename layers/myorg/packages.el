@@ -32,6 +32,7 @@
 (defconst myorg-packages
   '(
     (org :location built-in)
+    alert
     org-pomodoro
     )
   "The list of Lisp packages required by the myorg layer.
@@ -73,6 +74,66 @@ Each entry is either:
 ;; For more info on `use-package', see readme:
 ;; https://github.com/jwiegley/use-package
 
+(defun myorg/post-init-alert ()
+  (use-package alert
+    :defer t
+    :config
+    (progn
+      (setq exec-path (append exec-path '("~/.spacemacs.d/plugins/growlforwin")))
+      (defcustom alert-growlforwin-command (executable-find "growlnotify")
+        "Path to the growlnotify  command. This is found in the Growl Extras: http://growl.info/extras.php."
+        :type 'file
+        :group 'alert)
+
+      (defcustom alert-growlforwin-priorities
+        '((urgent   . 2)
+          (high     . 2)
+          (moderate . 1)
+          (normal   . 0)
+          (low      . -1)
+          (trivial  . -2))
+        "A mapping of alert severities onto Growl priority values."
+        :type '(alist :key-type symbol :value-type integer)
+        :group 'alert)
+
+      (defun alert-growlforwin-notify (info)
+        (if alert-growlforwin-command
+            (let* ((title (alert-encode-string (plist-get info :title)))
+                   (priority (number-to-string
+                              (cdr (assq (plist-get info :severity)
+                                         alert-growlforwin-priorities))))
+                   (args
+                    (case system-type
+                      ('windows-nt (mapcar
+                                    (lambda (lst) (apply #'concat lst))
+                                    `(
+                                      ;; http://www.growlforwindows.com/gfw/help/growlnotify.aspx
+                                      ("/i:" ,(file-truename (concat invocation-directory "../share/icons/hicolor/48x48/apps/emacs.png")))
+                                      ("/t:" ,title)
+                                      ("/p:" ,priority))))
+                      (t (list
+                          "--appIcon"  "Emacs"
+                          "--name"     "Emacs"
+                          "--title"    title
+                          "--priority" priority)))))
+              (if (and (plist-get info :persistent)
+                       (not (plist-get info :never-persist)))
+                  (case system-type
+                    ('windows-nt (nconc args (list "/s:true")))
+                    (t (nconc args (list "--sticky")))))
+              (let ((message (alert-encode-string (plist-get info :message))))
+                (case system-type
+                  ('windows-nt (nconc args (list message)))
+                  (t (nconc args (list "--message" message)))))
+              (apply #'call-process alert-growl-command nil nil nil args))
+          (alert-message-notify info)))
+
+      (alert-define-style 'growlforwin :title "Notify using Growl"
+                          :notifier #'alert-growlforwin-notify)
+
+      (setq alert-default-style 'growlforwin)
+      )))
+
 (defun myorg/post-init-org-pomodoro ()
   (use-package org-pomodoro
     :defer t
@@ -82,7 +143,17 @@ Each entry is either:
       (setq org-pomodoro-keep-killed-pomodoro-time t)
       (with-eval-after-load 'org-agenda
         (define-key org-agenda-mode-map (kbd "P") 'org-pomodoro))
-      (message "myorg/post-init-org-pomodoro: exit function"))))
+      (message "myorg/post-init-org-pomodoro: exit function"))
+    :config
+    (progn
+      (when (configuration-layer/package-usedp 'alert)
+            (progn
+              (add-hook 'org-pomodoro-finished-hook '(lambda ()
+                                                       (alert "☕️ Have a break!" :title "Pomodoro Finished")))
+              (add-hook 'org-pomodoro-short-break-finished-hook '(lambda ()
+                                                                   (alert "🐝 Ready to Go?" :title "Short Break")))
+              (add-hook 'org-pomodoro-long-break-finished-hook '(lambda ()
+                                                                  (alert "💪 Ready to Go?" :title "Long Break"))))))))
 
 (defun myorg/post-init-org ()
   (with-eval-after-load 'org
@@ -149,7 +220,7 @@ Each entry is either:
     (setq org-clock-in-resume t)
 
     ;; Change task state to STARTED when clocking in
-    (setq org-clock-in-switch-to-state "STARTED")
+    ;; (setq org-clock-in-switch-to-state "STARTED")
     ;; Save clock data and notes in the LOGBOOK drawer
     (setq org-clock-into-drawer t)
     ;; Removes clocked tasks with 0:00 duration
