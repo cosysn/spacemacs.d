@@ -160,26 +160,30 @@ Each entry is either:
   (with-eval-after-load 'org
     (progn
       (message "myorg/post-init-org: enter function")
+
+      ;; define the refile targets
+      (setq org-agenda-file-note (expand-file-name "notes.org" org-agenda-dir))
+      (setq org-agenda-file-gtd (expand-file-name "gtd.org" org-agenda-dir))
+      (setq org-agenda-file-journal (expand-file-name "journal.org" org-agenda-dir))
+      (setq org-agenda-file-code-snippet (expand-file-name "snippet.org" org-agenda-dir))
+      (setq org-default-notes-file (expand-file-name "gtd.org" org-agenda-dir))
+
       (spacemacs|disable-company org-mode)
+      (setq org-log-done t)
+
+      (setq org-todo-keywords
+            (quote ((sequence "TODO(t)" "STARTED(s)" "|" "DONE(d!/!)")
+                    (sequence "WAITING(w@/!)" "SOMEDAY(S)" "|" "CANCELLED(c@/!)" "MEETING(m)" "PHONE(p)"))))
 
       (myorg/init-myorg-capture)
       (myorg/init-myorg-clock)
-
+      (myorg/init-myorg-agenda)
       (message "myorg/post-init-org: exit function")
       ))
   )
 
 (defun myorg/init-myorg-capture ()
   "Org capture templates"
-
-  ;; define the refile targets
-  (setq org-agenda-file-note (expand-file-name "notes.org" org-agenda-dir))
-  (setq org-agenda-file-gtd (expand-file-name "gtd.org" org-agenda-dir))
-  (setq org-agenda-file-journal (expand-file-name "journal.org" org-agenda-dir))
-  (setq org-agenda-file-code-snippet (expand-file-name "snippet.org" org-agenda-dir))
-  (setq org-default-notes-file (expand-file-name "gtd.org" org-agenda-dir))
-  (setq org-agenda-files (list org-agenda-dir))
-
   ;; the %i would copy the selected text into the template
   ;;http://www.howardism.org/Technical/Emacs/journaling-org.html
   ;;add multi-file journal
@@ -248,4 +252,34 @@ Each entry is either:
 
 
     ))
+
+(defun myorg/init-myorg-agenda ()
+  (progn
+    (setq org-agenda-files (list org-agenda-dir))
+
+    ;; config stuck project
+    (setq org-stuck-projects
+          '("TODO={.+}/-DONE" nil nil "SCHEDULED:\\|DEADLINE:"))
+
+    (setq org-agenda-inhibit-startup t) ;; ~50x speedup
+    (setq org-agenda-span 'day)
+    (setq org-agenda-use-tag-inheritance nil) ;; 3-4x speedup
+    (setq org-agenda-window-setup 'current-window)
+    (setq org-log-done t)
+    ;;An entry without a cookie is treated just like priority ' B '.
+    ;;So when create new task, they are default 重要且紧急
+    (setq org-agenda-custom-commands
+          '(
+            ("w" . "任务安排")
+            ("wa" "重要且紧急的任务" tags-todo "+PRIORITY=\"A\"")
+            ("wb" "重要且不紧急的任务" tags-todo "-Weekly-Monthly-Daily+PRIORITY=\"B\"")
+            ("wc" "不重要且紧急的任务" tags-todo "+PRIORITY=\"C\"")
+            ("b" "Blog" tags-todo "BLOG")
+            ("p" . "项目安排")
+            ("pw" tags-todo "PROJECT+WORK+CATEGORY=\"cocos2d-x\"")
+            ("pl" tags-todo "PROJECT+DREAM+CATEGORY=\"zilongshanren\"")
+            ("W" "Weekly Review"
+             ((stuck "") ;; review stuck projects as designated by org-stuck-projects
+              (tags-todo "PROJECT") ;; review all projects (assuming you use todo keywords to designate projects)
+              ))))))
 ;;; packages.el ends here
