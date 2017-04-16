@@ -79,7 +79,6 @@ Each entry is either:
     :defer t
     :config
     (progn
-      (setq exec-path (append exec-path '("~/.spacemacs.d/plugins/growlforwin")))
       (defcustom alert-growlforwin-command (executable-find "growlnotify")
         "Path to the growlnotify  command. This is found in the Growl Extras: http://growl.info/extras.php."
         :type 'file

@@ -341,6 +341,24 @@ before packages are loaded. If you are unsure, you should try in setting them in
 	(setq warning-minimum-level :error)
 	;; hack for remove purpose mode
 	(setq purpose-mode nil)
+
+    ;; https://github.com/LdBeth/Emacs-for-Noobs/blob/master/Emacs%20on%20Windows%E8%B0%83%E7%94%A8%E5%A4%96%E9%83%A8%E7%A8%8B%E5%BA%8F.org
+    ;; http://www.voidcn.com/blog/winterttr/article/p-3231165.html
+    (defun wttr/prepend-to-exec-path (path)
+      "prepand the path to the emacs intenral `exec-path' and \"PATH\" env variable.
+Return the updated `exec-path'"
+      (setenv "PATH" (concat (expand-file-name path)
+                             path-separator
+                             (getenv "PATH")))
+      (setq exec-path
+            (cons (expand-file-name path)
+                  exec-path)))
+
+    (mapc #'wttr/prepend-to-exec-path
+          (reverse ( list
+                     "~/.spacemacs.d/plugins/growlforwin"
+                     )))
+
   )
 
 
