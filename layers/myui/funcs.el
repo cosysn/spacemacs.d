@@ -3,15 +3,15 @@
 ;; https://emacs-china.org/t/topic/1348
 ;; ====================================Themes automatically change =====================================
 ;;timer for automatically changing themes
-(setq mp-ui--interval-timer nil)
+(setq myui--interval-timer nil)
 
 ;;table is used to save (time themes) pair for automatically changing themes
 ;;time should be a string. themes should be a variant , not symbos.
-(setq mp-ui--time-themes-table nil)
+(setq myui--time-themes-table nil)
 
 (defun myui/config-time-themes-table (tt)
   "Set time . themes table for time-themes-table."
-  (setq mp-ui--time-themes-table
+  (setq myui--time-themes-table
       ;; sort firstly, get-themes-according require a sorted table.
       (sort tt (lambda (x y) (< (string-to-int (car x)) (string-to-int (car y)))))
         )
@@ -24,8 +24,8 @@ Value of hour-string should be between 1 and 24(including)."
     (let (
           (now-time (string-to-int hour-string))
           ;; init current-themes to the themes of final item
-          (correct-themes (cdr (car (last mp-ui--time-themes-table))))
-          (loop-list mp-ui--time-themes-table)
+          (correct-themes (cdr (car (last myui--time-themes-table))))
+          (loop-list myui--time-themes-table)
           )
 
         ;; loop to set correct themes to correct-themes
@@ -57,14 +57,14 @@ then check whether emacs should to modify theme, if so, modify it."
   (interactive)
   (myui/check-time-and-modify-theme)
   (setq
-   mp-ui--interval-timer (run-at-time 3600 3600 'myui/check-time-and-modify-theme))
+   myui--interval-timer (run-at-time 3600 3600 'myui/check-time-and-modify-theme))
   (message "themes auto change open.")
   )
 
 (defun myui/close-themes-auto-change ()
   "Close automatically change themes."
   (interactive)
-  (cancel-timer mp-ui--interval-timer)
+  (cancel-timer myui--interval-timer)
   (message "themes auto change close.")
   )
   
