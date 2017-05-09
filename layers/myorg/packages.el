@@ -158,26 +158,50 @@ Each entry is either:
 (defun myorg/post-init-org ()
   (with-eval-after-load 'org
     (progn
-      (message "myorg/post-init-org: enter function")
+      (setq org-agenda-file-note (expand-file-name "notes.org" org-agenda-dir))
+      (setq org-agenda-file-index (expand-file-name "index.org" org-agenda-dir))
+      (setq org-agenda-file-gtd (expand-file-name "gtd.org" org-agenda-dir))
+      (setq org-agenda-file-someday (expand-file-name "someday.org" org-agenda-dir))
+      (setq org-agenda-file-journal (expand-file-name "journal.org" org-agenda-dir))
+      (setq org-agenda-file-birthday (expand-file-name "birthday.org" org-agenda-dir))
+      (setq org-agenda-file-code-snippet (expand-file-name "snippet.org" org-agenda-dir))
+      (setq org-default-notes-file (expand-file-name "index.org" org-agenda-dir))
 
       ;; define the refile targets
-      (setq org-agenda-file-note (expand-file-name "notes.org" org-agenda-dir))
-      (setq org-agenda-file-gtd (expand-file-name "gtd.org" org-agenda-dir))
-      (setq org-agenda-file-journal (expand-file-name "journal.org" org-agenda-dir))
-      (setq org-agenda-file-code-snippet (expand-file-name "snippet.org" org-agenda-dir))
-      (setq org-default-notes-file (expand-file-name "gtd.org" org-agenda-dir))
+      (setq org-refile-use-outline-path 'file)
+      (setq org-outline-path-complete-in-steps nil)
+      (setq org-refile-targets
+            '((nil :maxlevel . 4)
+              (org-agenda-files :maxlevel . 4)))
 
       (spacemacs|disable-company org-mode)
       (setq org-log-done t)
 
       (setq org-todo-keywords
-            (quote ((sequence "TODO(t)" "STARTED(s)" "|" "DONE(d!/!)")
-                    (sequence "WAITING(w@/!)" "SOMEDAY(S)" "|" "CANCELLED(c@/!)" "MEETING(m)" "PHONE(p)"))))
+            (quote ((sequence "TODO(t)" "NEXT(n)" "|" "DONE(d!/!)")
+                    (sequence "WAITING(w@/!)" "DEFERRED(D@/!)" "|" "CANCELLED(c@/!)"))))
+
+      (setq org-todo-keyword-faces
+            (quote (("TODO" :foreground "red" :weight bold)
+                    ("NEXT" :foreground "blue" :weight bold)
+                    ("DONE" :foreground "forest green" :weight bold)
+                    ("WAITING" :foreground "orange" :weight bold)
+                    ("DEFERRED" :foreground "magenta" :weight bold)
+                    ("CANCELLED" :foreground "forest green" :weight bold))))
+
+      (setq org-todo-state-tags-triggers
+            (quote (("CANCELLED" ("CANCELLED" . t))
+                    ("WAITING" ("WAITING" . t))
+                    ("DEFERRED" ("WAITING") ("DEFERRED" . t))
+                    (done ("WAITING") ("DEFERRED"))
+                    ("TODO" ("WAITING") ("CANCELLED") ("DEFERRED"))
+                    ("NEXT" ("WAITING") ("CANCELLED") ("DEFERRED"))
+                    ("DONE" ("WAITING") ("CANCELLED") ("DEFERRED")))))
 
       (myorg/init-myorg-capture)
       (myorg/init-myorg-clock)
       (myorg/init-myorg-agenda)
-      (message "myorg/post-init-org: exit function")
+      (myorg/init-myorg-gtd)
       ))
   )
 
@@ -187,7 +211,7 @@ Each entry is either:
   ;;http://www.howardism.org/Technical/Emacs/journaling-org.html
   ;;add multi-file journal
   (setq org-capture-templates
-        '(("t" "Todo" entry (file+headline org-agenda-file-gtd "Workspace")
+        '(("t" "Todo" entry (file+headline org-agenda-file-index "Ideas")
            "* TODO [#B] %?\n  %i\n"
            :empty-lines 1)
           ("n" "notes" entry (file+headline org-agenda-file-note "Quick notes")
@@ -281,4 +305,13 @@ Each entry is either:
              ((stuck "") ;; review stuck projects as designated by org-stuck-projects
               (tags-todo "PROJECT") ;; review all projects (assuming you use todo keywords to designate projects)
               ))))))
+
+(defun myorg/init-myorg-gtd ()
+  (progn
+    (defun myorg/find-gtdfile ()
+      "Edit the `gtdfile', in the current window."
+      (interactive)
+      (find-file-existing (org-agenda-file-gtd)))
+    (global-set-key (kbd "C-c g") 'myorg/find-gtdfile)
+    ))
 ;;; packages.el ends here
