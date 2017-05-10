@@ -3,3 +3,15 @@
 
 # Packaging
 .cask
+
+# Backup files
+*~
+
+# Undo-tree save-files
+*.~undo-tree
+
+snippets/
+
+.DS_Store
+
+!/snippets/README.md
