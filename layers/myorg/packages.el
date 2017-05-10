@@ -84,7 +84,6 @@ Each entry is either:
         :type 'file
         :group 'alert)
 
-      (message (executable-find "growlnotify"))
       (defcustom alert-growlforwin-priorities
         '((urgent   . 2)
           (high     . 2)
@@ -131,8 +130,7 @@ Each entry is either:
       (alert-define-style 'growlforwin :title "Notify using Growl"
                           :notifier #'alert-growlforwin-notify)
 
-      (setq alert-default-style 'growlforwin)
-      )))
+      (setq alert-default-style 'growlforwin))))
 
 (defun myorg/post-init-org-pomodoro ()
   (use-package org-pomodoro
@@ -156,45 +154,31 @@ Each entry is either:
 (defun myorg/post-init-org ()
   (with-eval-after-load 'org
     (progn
-      (setq org-agenda-file-note (expand-file-name "notes.org" org-agenda-dir))
-      (setq org-agenda-file-index (expand-file-name "index.org" org-agenda-dir))
-      (setq org-agenda-file-gtd (expand-file-name "gtd.org" org-agenda-dir))
-      (setq org-agenda-file-someday (expand-file-name "someday.org" org-agenda-dir))
-      (setq org-agenda-file-journal (expand-file-name "journal.org" org-agenda-dir))
-      (setq org-agenda-file-birthday (expand-file-name "birthday.org" org-agenda-dir))
-      (setq org-agenda-file-code-snippet (expand-file-name "snippet.org" org-agenda-dir))
-      (setq org-default-notes-file (expand-file-name "index.org" org-agenda-dir))
-
-      ;; define the refile targets
-      (setq org-refile-use-outline-path 'file)
-      (setq org-outline-path-complete-in-steps nil)
-      (setq org-refile-targets
-            '((nil :maxlevel . 4)
-              (org-agenda-files :maxlevel . 4)))
-
-      ;; define the refile targets
-      (setq org-refile-use-outline-path 'file)
-      (setq org-outline-path-complete-in-steps nil)
-      (setq org-refile-targets
-            '((nil :maxlevel . 4)
-              (org-agenda-files :maxlevel . 4)))
-
       (spacemacs|disable-company org-mode)
-      (setq org-log-done t)
+      (myorg/init-myorg-gtd)
+      )))
 
-      (setq org-todo-keywords
+(defun myorg/init-myorg-gtd ()
+  (progn
+    (defun myorg/find-gtdfile ()
+      "Edit the `gtdfile', in the current window."
+      (interactive)
+      (find-file-existing (org-agenda-file-gtd)))
+    (global-set-key (kbd "C-c g") 'myorg/find-gtdfile)
+	
+	(setq org-todo-keywords
             (quote ((sequence "TODO(t)" "NEXT(n)" "|" "DONE(d!/!)")
                     (sequence "WAITING(w@/!)" "DEFERRED(D@/!)" "|" "CANCELLED(c@/!)"))))
 
-      (setq org-todo-keyword-faces
-            (quote (("TODO" :foreground "red" :weight bold)
-                    ("NEXT" :foreground "blue" :weight bold)
-                    ("DONE" :foreground "forest green" :weight bold)
-                    ("WAITING" :foreground "orange" :weight bold)
-                    ("DEFERRED" :foreground "magenta" :weight bold)
-                    ("CANCELLED" :foreground "forest green" :weight bold))))
+    (setq org-todo-keyword-faces
+			(quote (("TODO" :foreground "red" :weight bold)
+					("NEXT" :foreground "blue" :weight bold)
+					("DONE" :foreground "forest green" :weight bold)
+					("WAITING" :foreground "orange" :weight bold)
+					("DEFERRED" :foreground "magenta" :weight bold)
+					("CANCELLED" :foreground "forest green" :weight bold))))
 
-      (setq org-todo-state-tags-triggers
+    (setq org-todo-state-tags-triggers
             (quote (("CANCELLED" ("CANCELLED" . t))
                     ("WAITING" ("WAITING" . t))
                     ("DEFERRED" ("WAITING") ("DEFERRED" . t))
@@ -202,21 +186,21 @@ Each entry is either:
                     ("TODO" ("WAITING") ("CANCELLED") ("DEFERRED"))
                     ("NEXT" ("WAITING") ("CANCELLED") ("DEFERRED"))
                     ("DONE" ("WAITING") ("CANCELLED") ("DEFERRED")))))
-
-      (myorg/init-myorg-capture)
-      (myorg/init-myorg-clock)
-      (myorg/init-myorg-agenda)
-      (myorg/init-myorg-gtd)
-      ))
-  )
-
-(defun myorg/init-myorg-capture ()
-  "Org capture templates"
-  ;; the %i would copy the selected text into the template
-  ;;http://www.howardism.org/Technical/Emacs/journaling-org.html
-  ;;add multi-file journal
-  (setq org-capture-templates
-        '(("t" "Todo" entry (file+headline org-agenda-file-index "Ideas")
+	
+	;; define the refile targets
+    (setq org-refile-use-outline-path 'file)
+    (setq org-outline-path-complete-in-steps nil)
+    (setq org-refile-targets
+		'((nil :maxlevel . 4)
+			(org-agenda-files :maxlevel . 4)))
+	
+	(setq org-log-done t)
+	
+	;; the %i would copy the selected text into the template
+	;;http://www.howardism.org/Technical/Emacs/journaling-org.html
+	;;add multi-file journal
+	(setq org-capture-templates
+		'(("t" "Todo" entry (file+headline org-agenda-file-index "Ideas")
            "* TODO [#B] %?\n  %i\n"
            :empty-lines 1)
           ("n" "notes" entry (file+headline org-agenda-file-note "Quick notes")
@@ -241,19 +225,16 @@ Each entry is either:
             entry (file+datetree org-agenda-file-journal)
             "* %?"
             :empty-lines 1)))
-  )
-
-(defun myorg/init-myorg-clock ()
-  "Org clock"
-  (progn
-    ;; Save the running clock and all clock history when exiting Emacs, load it on startup
+			
+	;; Org clock
+	;; Save the running clock and all clock history when exiting Emacs, load it on startup
     (with-eval-after-load 'org
                 (org-clock-persistence-insinuate))
     (setq org-clock-persist t)
     (setq org-clock-in-resume t)
 
-    ;; Change task state to STARTED when clocking in
-    ;; (setq org-clock-in-switch-to-state "STARTED")
+    ;; Change task state to NEXT when clocking in
+    (setq org-clock-in-switch-to-state "NEXT")
     ;; Save clock data and notes in the LOGBOOK drawer
     (setq org-clock-into-drawer t)
     ;; Removes clocked tasks with 0:00 duration
@@ -278,12 +259,8 @@ Each entry is either:
                 (define-key org-clock-mode-line-map [header-line mouse-2] 'org-clock-goto)
                 (define-key org-clock-mode-line-map [header-line mouse-1] 'org-clock-menu))
 
-
-    ))
-
-(defun myorg/init-myorg-agenda ()
-  (progn
-    (setq org-agenda-files (list org-agenda-dir))
+	;; Org agenda
+	(setq org-agenda-files (list org-agenda-dir))
 
     ;; config stuck project
     (setq org-stuck-projects
@@ -309,14 +286,6 @@ Each entry is either:
             ("W" "Weekly Review"
              ((stuck "") ;; review stuck projects as designated by org-stuck-projects
               (tags-todo "PROJECT") ;; review all projects (assuming you use todo keywords to designate projects)
-              ))))))
-
-(defun myorg/init-myorg-gtd ()
-  (progn
-    (defun myorg/find-gtdfile ()
-      "Edit the `gtdfile', in the current window."
-      (interactive)
-      (find-file-existing (org-agenda-file-gtd)))
-    (global-set-key (kbd "C-c g") 'myorg/find-gtdfile)
+              ))))
     ))
 ;;; packages.el ends here
