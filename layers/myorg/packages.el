@@ -139,11 +139,9 @@ Each entry is either:
     :defer t
     :init
     (progn
-      (message "myorg/post-init-org-pomodoro: enter function")
       (setq org-pomodoro-keep-killed-pomodoro-time t)
       (with-eval-after-load 'org-agenda
-        (define-key org-agenda-mode-map (kbd "P") 'org-pomodoro))
-      (message "myorg/post-init-org-pomodoro: exit function"))
+        (define-key org-agenda-mode-map (kbd "P") 'org-pomodoro)))
     :config
     (progn
       (when (configuration-layer/package-usedp 'alert)
@@ -158,14 +156,18 @@ Each entry is either:
 (defun myorg/post-init-org ()
   (with-eval-after-load 'org
     (progn
-      (message "myorg/post-init-org: enter function")
-
-      ;; define the refile targets
       (setq org-agenda-file-note (expand-file-name "notes.org" org-agenda-dir))
       (setq org-agenda-file-gtd (expand-file-name "gtd.org" org-agenda-dir))
       (setq org-agenda-file-journal (expand-file-name "journal.org" org-agenda-dir))
       (setq org-agenda-file-code-snippet (expand-file-name "snippet.org" org-agenda-dir))
       (setq org-default-notes-file (expand-file-name "gtd.org" org-agenda-dir))
+
+      ;; define the refile targets
+      (setq org-refile-use-outline-path 'file)
+      (setq org-outline-path-complete-in-steps nil)
+      (setq org-refile-targets
+            '((nil :maxlevel . 4)
+              (org-agenda-files :maxlevel . 4)))
 
       (spacemacs|disable-company org-mode)
       (setq org-log-done t)

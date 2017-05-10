@@ -12,8 +12,5 @@
 
 ;; Variables
 
-(defvar org-agenda-dir ""
+(defvar org-agenda-dir "~/myorg"
   "gtd org files location")
-
-(setq-default
- org-agenda-dir "~/myorg")
